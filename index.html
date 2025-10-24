@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZenTrack - Your Wellness Journey</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="mobile-sidebar-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+  <button class="mobile-menu-btn" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+  
+  <div id="home" class="page active">
+    <div class="landing-container">
+      <nav class="landing-nav">
+        <div class="nav-content">
+          <div class="logo"><i class="fas fa-leaf"></i> ZenTrack</div>
+          <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#" onclick="showPage('about')">About</a></li>
+            <li><button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button></li>
+          </ul>
+          <div class="auth-buttons" id="authButtons">
+            <a href="#" class="btn btn-secondary" onclick="openModal('signin')">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="#" class="btn btn-primary" onclick="openModal('signup')">
+              <i class="fas fa-user-plus"></i> Get Started
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <h1>Transform Your Wellness Journey</h1>
+        <p>Track your fitness, nutrition, and mental wellbeing in one beautifully designed platform. Achieve your goals with personalized plans and actionable insights.</p>
+        <div class="hero-buttons">
+          <a href="#" class="btn btn-primary" onclick="openModal('signup')">
+            <i class="fas fa-users"></i> Join Us Today!
+          </a>
+        </div>
+      </section>
+
+      <section class="features" id="features">
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+            <h3>Smart Analytics</h3>
+            <p>Get real-time insights into your wellness journey with comprehensive analytics, progress tracking, and personalized recommendations.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-tasks"></i></div>
+            <h3>Task Management</h3>
+            <p>Organize your wellness goals with intelligent task management, priority levels, and category-based organization for maximum productivity.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-dumbbell"></i></div>
+            <h3>Fitness Programs</h3>
+            <p>Access expertly curated wellness programs designed to help you achieve specific goals with structured, progressive challenges.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-stopwatch"></i></div>
+            <h3>Workout Timer</h3>
+            <p>Built-in precision timer with customizable presets for workouts, meditation sessions, and other wellness activities.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+            <h3>Resource Library</h3>
+            <p>Comprehensive guides covering fitness, nutrition, meditation, and wellness best practices from certified experts.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-bullseye"></i></div>
+            <h3>Goal Tracking</h3>
+            <p>Set, monitor, and achieve your wellness objectives with data-driven insights and personalized milestone celebrations.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="about" class="page">
+    <div class="landing-container">
+      <nav class="landing-nav">
+        <div class="nav-content">
+          <div class="logo"><i class="fas fa-leaf"></i> ZenTrack</div>
+          <ul class="nav-links">
+            <li><a href="#" onclick="showPage('home')">Home</a></li>
+            <li><a href="#" onclick="showPage('about')">About</a></li>
+            <li><button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button></li>
+          </ul>
+          <div class="auth-buttons">
+            <a href="#" class="btn btn-secondary" onclick="openModal('signin')">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="#" class="btn btn-primary" onclick="openModal('signup')">
+              <i class="fas fa-user-plus"></i> Get Started
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <h1>About ZenTrack</h1>
+        <p>Empowering your wellness journey through intelligent tracking, personalized insights, and community support.</p>
+      </section>
+
+      <section class="features" style="padding-top: 2rem;">
+        <div style="max-width: 800px; margin: 0 auto; text-align: left;">
+          <div class="feature-card" style="margin-bottom: 3rem;">
+            <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.75rem;">Our Mission</h3>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">At ZenTrack, we believe that wellness is a journey, not a destination. Our mission is to provide you with the tools, insights, and support you need to create lasting positive changes in your life.</p>
+          </div>
+          
+          <div class="feature-card" style="text-align: center;">
+            <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.75rem;">Ready to Start Your Journey?</h3>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); margin-bottom: 2rem;">Join thousands of users who have transformed their wellness journey with ZenTrack.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              <a href="#" class="btn btn-primary" onclick="openModal('signup')">
+                <i class="fas fa-rocket"></i> Get Started Free
+              </a>
+              <a href="#" class="btn btn-secondary" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="dashboardLayout" class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fas fa-leaf"></i> ZenTrack</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Overview</div>
+          <a href="#" class="nav-item active" onclick="showDashboardPage('dashboard')">
+            <i class="fas fa-chart-pie"></i> Dashboard
+          </a>
+          <a href="#" class="nav-item" onclick="showDashboardPage('progress')">
+            <i class="fas fa-chart-line"></i> Progress
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Wellness</div>
+          <a href="#" class="nav-item" onclick="showDashboardPage('tasks')">
+            <i class="fas fa-tasks"></i> Tasks
+          </a>
+          <a href="#" class="nav-item" onclick="showDashboardPage('programs')">
+            <i class="fas fa-graduation-cap"></i> Programs
+          </a>
+          <a href="#" class="nav-item" onclick="showDashboardPage('fitness')">
+            <i class="fas fa-dumbbell"></i> Fitness Timer
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Resources</div>
+          <a href="#" class="nav-item" onclick="showDashboardPage('resources')">
+            <i class="fas fa-book"></i> Resource Library
+          </a>
+          <a href="#" class="nav-item" onclick="showDashboardPage('contact')">
+            <i class="fas fa-envelope"></i> Contact Support
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="#" class="nav-item" onclick="showDashboardPage('settings')">
+            <i class="fas fa-cog"></i> Settings
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Legal</div>
+          <a href="#" class="nav-item" onclick="showDashboardPage('privacy')">
+            <i class="fas fa-shield-alt"></i> Privacy Policy
+          </a>
+          <a href="#" class="nav-item" onclick="showDashboardPage('terms')">
+            <i class="fas fa-file-contract"></i> Terms of Service
+          </a>
+        </div>
+      </nav>
+      <div class="user-section">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-details">
+            <h4 id="userName">User</h4>
+            <p id="userEmail">user@example.com</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="theme-toggle" style="flex: 1;" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i> Theme
+          </button>
+          <button class="logout-btn" style="flex: 2;" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div id="dashboard" class="dashboard-page active">
+        <div class="content-header">
+          <h1>Dashboard</h1>
+          <p>Welcome back! Here's your wellness overview for today.</p>
+        </div>
+        <div class="content-body">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+              </div>
+              <div class="stat-number" id="totalTasks">0</div>
+              <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+              </div>
+              <div class="stat-number" id="completedTasks">0</div>
+              <div class="stat-label">Completed Tasks</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+              </div>
+              <div class="stat-number" id="activePrograms">0</div>
+              <div class="stat-label">Active Programs</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+              </div>
+              <div class="stat-number" id="completionRate">0%</div>
+              <div class="stat-label">Completion Rate</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Activity</h3>
+              <p class="card-subtitle">Your latest wellness tasks and achievements</p>
+            </div>
+            <div class="card-body">
+              <div id="recentTasks" class="task-list">
+                <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No recent tasks. Start by adding your first wellness goal!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tasks" class="dashboard-page">
+        <div class="content-header">
+          <h1>Task Management</h1>
+          <p>Organize and track your wellness goals with smart task management.</p>
+        </div>
+        <div class="content-body">
+          <div class="task-form">
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Add New Task</h3>
+            <div class="task-form-grid">
+              <div class="form-group">
+                <label class="form-label" for="taskTitle">Task Title</label>
+                <input type="text" id="taskTitle" class="form-input" placeholder="Enter your wellness goal" required maxlength="255">
+                <div class="character-counter" id="taskTitleCounter">0/255</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="taskPriority">Priority</label>
+                <select id="taskPriority" class="form-select">
+                  <option value="low">Low Priority</option>
+                  <option value="medium">Medium Priority</option>
+                  <option value="high">High Priority</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="taskCategory">Category</label>
+                <select id="taskCategory" class="form-select">
+                  <option value="wellness">Wellness</option>
+                  <option value="work">Work</option>
+                  <option value="education">Education</option>
+                  <option value="personal">Personal</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="taskDueDate">Due Date</label>
+                <input type="date" id="taskDueDate" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="opacity: 0;">Action</label>
+                <button class="btn btn-primary" onclick="addTask()">
+                  <i class="fas fa-plus"></i> Add Task
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 1.5rem;">
+            <input type="text" id="taskSearch" class="search-box" placeholder="Search tasks..." oninput="debouncedSearch()">
+            <div class="sort-controls">
+              <button class="sort-btn active" onclick="sortTasks('newest')">Newest First</button>
+              <button class="sort-btn" onclick="sortTasks('oldest')">Oldest First</button>
+              <button class="sort-btn" onclick="sortTasks('priority')">By Priority</button>
+              <button class="sort-btn" onclick="sortTasks('dueDate')">By Due Date</button>
+              <button class="sort-btn" onclick="sortTasks('completed')">Completion Status</button>
+            </div>
+          </div>
+
+          <div class="task-filters">
+            <button class="filter-btn active" onclick="filterTasks('all')">All Tasks</button>
+            <button class="filter-btn" onclick="filterTasks('pending')">Pending</button>
+            <button class="filter-btn" onclick="filterTasks('completed')">Completed</button>
+            <button class="filter-btn" onclick="filterTasks('high')">High Priority</button>
+            <button class="filter-btn" onclick="filterTasks('wellness')">Wellness</button>
+            <button class="filter-btn" onclick="filterTasks('work')">Work</button>
+          </div>
+
+          <div id="tasksList" class="task-list">
+            <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No tasks yet. Add your first wellness goal above!</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="programs" class="dashboard-page">
+        <div class="content-header">
+          <h1>Wellness Programs</h1>
+          <p>Choose from expertly curated wellness programs designed to help you achieve your goals.</p>
+        </div>
+        <div class="content-body">
+          <div class="programs-grid" id="programsGrid"></div>
+        </div>
+      </div>
+
+      <div id="fitness" class="dashboard-page">
+        <div class="content-header">
+          <h1>Fitness Timer</h1>
+          <p>Track your workouts, meditation sessions, and wellness activities with precision timing.</p>
+        </div>
+        <div class="content-body">
+          <div class="timer-container">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Workout Timer</h3>
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="timer-inputs">
+              <div class="timer-input-group">
+                <label>Hours</label>
+                <input type="number" class="timer-input" id="hoursInput" min="0" max="23" value="0">
+              </div>
+              <div class="timer-input-group">
+                <label>Minutes</label>
+                <input type="number" class="timer-input" id="minutesInput" min="0" max="59" value="0">
+              </div>
+              <div class="timer-input-group">
+                <label>Seconds</label>
+                <input type="number" class="timer-input" id="secondsInput" min="0" max="59" value="0">
+              </div>
+            </div>
+            <div class="timer-controls">
+              <button class="btn btn-primary" onclick="startTimer()">
+                <i class="fas fa-play"></i> Start
+              </button>
+              <button class="btn btn-secondary" onclick="pauseTimer()">
+                <i class="fas fa-pause"></i> Pause
+              </button>
+              <button class="btn btn-secondary" onclick="resetTimer()">
+                <i class="fas fa-redo"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Preset Timers</h3>
+          <div class="preset-timers">
+            <div class="preset-card" onclick="setPresetTimer(0, 5, 0)">
+              <h4>Quick Break</h4>
+              <p>5 minutes</p>
+            </div>
+            <div class="preset-card" onclick="setPresetTimer(0, 15, 0)">
+              <h4>Meditation</h4>
+              <p>15 minutes</p>
+            </div>
+            <div class="preset-card" onclick="setPresetTimer(0, 30, 0)">
+              <h4>Cardio Session</h4>
+              <p>30 minutes</p>
+            </div>
+            <div class="preset-card" onclick="setPresetTimer(0, 45, 0)">
+              <h4>Full Workout</h4>
+              <p>45 minutes</p>
+            </div>
+            <div class="preset-card" onclick="setPresetTimer(1, 0, 0)">
+              <h4>Long Session</h4>
+              <p>1 hour</p>
+            </div>
+            <div class="preset-card" onclick="setPresetTimer(0, 2, 0)">
+              <h4>Plank Hold</h4>
+              <p>2 minutes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="progress" class="dashboard-page">
+        <div class="content-header">
+          <h1>Progress Overview</h1>
+          <p>Track your wellness journey and celebrate your achievements.</p>
+        </div>
+        <div class="content-body">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+              </div>
+              <div class="stat-number" id="progressTotalTasks">0</div>
+              <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+              </div>
+              <div class="stat-number" id="progressCompletedTasks">0</div>
+              <div class="stat-label">Completed Tasks</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+              </div>
+              <div class="stat-number" id="progressActivePrograms">0</div>
+              <div class="stat-label">Active Programs</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+              </div>
+              <div class="stat-number" id="progressCompletionRate">0%</div>
+              <div class="stat-label">Completion Rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-fire"></i></div>
+              </div>
+              <div class="stat-number" id="currentStreak">0</div>
+              <div class="stat-label">Day Streak</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+              </div>
+              <div class="stat-number" id="totalPoints">0</div>
+              <div class="stat-label">Points Earned</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Weekly Progress</h3>
+                <p class="card-subtitle">Tasks completed this week</p>
+              </div>
+              <div class="card-body">
+                <div id="weeklyChart" style="height: 200px; display: flex; align-items: end; gap: 0.5rem; padding: 1rem 0;">
+                  <div class="chart-bar" data-day="Mon" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 20%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Mon</span>
+                  </div>
+                  <div class="chart-bar" data-day="Tue" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 40%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Tue</span>
+                  </div>
+                  <div class="chart-bar" data-day="Wed" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 60%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Wed</span>
+                  </div>
+                  <div class="chart-bar" data-day="Thu" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 80%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Thu</span>
+                  </div>
+                  <div class="chart-bar" data-day="Fri" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 100%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Fri</span>
+                  </div>
+                  <div class="chart-bar" data-day="Sat" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 30%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Sat</span>
+                  </div>
+                  <div class="chart-bar" data-day="Sun" style="flex: 1; background: var(--primary-color); border-radius: 0.25rem 0.25rem 0 0; height: 50%; min-height: 10px; position: relative;">
+                    <span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary);">Sun</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Category Breakdown</h3>
+                <p class="card-subtitle">Tasks by category</p>
+              </div>
+              <div class="card-body">
+                <div id="categoryBreakdown">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="width: 12px; height: 12px; background: var(--primary-color); border-radius: 50%;"></div>
+                      <span>Wellness</span>
+                    </div>
+                    <span id="wellnessCount">0</span>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="width: 12px; height: 12px; background: var(--secondary-color); border-radius: 50%;"></div>
+                      <span>Work</span>
+                    </div>
+                    <span id="workCount">0</span>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="width: 12px; height: 12px; background: var(--accent-color); border-radius: 50%;"></div>
+                      <span>Education</span>
+                    </div>
+                    <span id="educationCount">0</span>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="width: 12px; height: 12px; background: var(--success-color); border-radius: 50%;"></div>
+                      <span>Personal</span>
+                    </div>
+                    <span id="personalCount">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Recent Achievements</h3>
+                <p class="card-subtitle">Your latest completed wellness tasks</p>
+              </div>
+              <div class="card-body">
+                <div id="progressRecentTasks" class="task-list">
+                  <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Complete some tasks to see your achievements here!</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Badges & Milestones</h3>
+                <p class="card-subtitle">Unlock achievements as you progress</p>
+              </div>
+              <div class="card-body">
+                <div id="badgesList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem;">
+                  <div class="badge-item" style="text-align: center; padding: 1rem; border-radius: 0.5rem; background: var(--light-bg);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏆</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">First Task</div>
+                  </div>
+                  <div class="badge-item" style="text-align: center; padding: 1rem; border-radius: 0.5rem; background: var(--light-bg); opacity: 0.5;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔥</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">7 Day Streak</div>
+                  </div>
+                  <div class="badge-item" style="text-align: center; padding: 1rem; border-radius: 0.5rem; background: var(--light-bg); opacity: 0.5;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⭐</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">10 Tasks</div>
+                  </div>
+                  <div class="badge-item" style="text-align: center; padding: 1rem; border-radius: 0.5rem; background: var(--light-bg); opacity: 0.5;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">💪</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Fitness Pro</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resources" class="dashboard-page">
+        <div class="content-header">
+          <h1>Resource Library</h1>
+          <p>Explore comprehensive wellness resources to support your journey.</p>
+        </div>
+        <div class="content-body">
+          <div class="resources-grid">
+            <div class="resource-section">
+              <h3><i class="fas fa-seedling"></i> Wellness Blog</h3>
+              <div class="resource-item">
+                <h4>The Science of Habit Formation</h4>
+                <p>Learn how to build lasting wellness habits that stick with evidence-based strategies and psychological insights.</p>
+              </div>
+              <div class="resource-item">
+                <h4>Stress Management in Modern Life</h4>
+                <p>Practical techniques for managing stress and maintaining mental wellbeing in today's fast-paced world.</p>
+              </div>
+            </div>
+
+            <div class="resource-section">
+              <h3><i class="fas fa-dumbbell"></i> Fitness Guide</h3>
+              <div class="resource-item">
+                <h4>Beginner's Guide to Strength Training</h4>
+                <p>Start your strength training journey with proper form, progressive overload, and safety tips.</p>
+              </div>
+              <div class="resource-item">
+                <h4>Cardio vs. Strength Training</h4>
+                <p>Understand the benefits of different exercise types and how to balance them in your routine.</p>
+              </div>
+            </div>
+
+            <div class="resource-section">
+              <h3><i class="fas fa-apple-alt"></i> Nutrition Tips</h3>
+              <div class="resource-item">
+                <h4>Balanced Meal Planning</h4>
+                <p>Create nutritious, balanced meals that fuel your body and support your wellness goals.</p>
+              </div>
+              <div class="resource-item">
+                <h4>Hydration Guidelines</h4>
+                <p>Understand your hydration needs and learn practical tips for staying properly hydrated.</p>
+              </div>
+            </div>
+
+            <div class="resource-section">
+              <h3><i class="fas fa-om"></i> Meditation Guide</h3>
+              <div class="resource-item">
+                <h4>Getting Started with Meditation</h4>
+                <p>Begin your meditation practice with simple techniques and practical guidance for beginners.</p>
+              </div>
+              <div class="resource-item">
+                <h4>Breathing Techniques</h4>
+                <p>Master various breathing exercises to reduce stress, improve focus, and enhance wellbeing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="contact" class="dashboard-page">
+        <div class="content-header">
+          <h1>Contact Support</h1>
+          <p>Have questions or need assistance? We're here to help you on your wellness journey.</p>
+        </div>
+        <div class="content-body">
+          <div class="contact-form">
+            <form id="contactForm" action="https://formsubmit.co/nilay2011op@gmail.com" method="POST">
+              <input type="hidden" name="_captcha" value="false">
+              <input type="hidden" name="_subject" value="New Contact Form Submission">
+              <input type="hidden" name="_template" value="table">
+              <div class="form-group">
+                <label class="form-label" for="contactName">Full Name</label>
+                <input type="text" id="contactName" name="name" class="form-input" required maxlength="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contactEmail">Email Address</label>
+                <input type="email" id="contactEmail" name="email" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contactSubject">Subject</label>
+                <input type="text" id="contactSubject" name="subject" class="form-input" required maxlength="200">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contactMessage">Message</label>
+                <textarea id="contactMessage" name="message" rows="5" required maxlength="1000"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="privacy" class="dashboard-page">
+        <div class="content-header">
+          <h1>Privacy Policy</h1>
+          <p>Your privacy and data security are our top priorities.</p>
+        </div>
+        <div class="content-body">
+          <div class="legal-content">
+            <p><strong>Last updated:</strong> October 2025</p>
+            <h2>Information We Collect</h2>
+            <p>We collect information you provide directly to us, such as when you create an account, use our services, or contact us for support.</p>
+            <h3>Personal Information</h3>
+            <p>This may include your name, email address, and wellness-related data you choose to track through our platform.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="settings" class="dashboard-page">
+        <div class="content-header">
+          <h1>Account Settings</h1>
+          <p>Manage your profile, preferences, and account settings.</p>
+        </div>
+        <div class="content-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Profile Information</h3>
+                <p class="card-subtitle">Update your personal details</p>
+              </div>
+              <div class="card-body">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                  <div id="settingsAvatar" class="user-avatar" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 1rem;">U</div>
+                  <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('avatarUpload').click()">
+                    <i class="fas fa-camera"></i> Change Photo
+                  </button>
+                </div>
+                <form id="profileForm">
+                  <div class="form-group">
+                    <label class="form-label" for="settingsName">Display Name</label>
+                    <input type="text" id="settingsName" class="form-input" placeholder="Enter your name" maxlength="50">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settingsEmail">Email Address</label>
+                    <input type="email" id="settingsEmail" class="form-input" readonly style="background: var(--light-bg); color: var(--text-secondary);">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settingsBio">Bio</label>
+                    <textarea id="settingsBio" class="form-input" rows="3" placeholder="Tell us about yourself..." maxlength="500"></textarea>
+                    <div class="character-counter" id="bioCounter">0/500</div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Profile
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Preferences</h3>
+                <p class="card-subtitle">Customize your experience</p>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Theme</label>
+                  <select id="themeSelect" class="form-select" onchange="changeTheme(this.value)">
+                    <option value="light">Light Mode</option>
+                    <option value="dark">Dark Mode</option>
+                    <option value="auto">Auto (System)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Default Task Priority</label>
+                  <select id="defaultPriority" class="form-select">
+                    <option value="low">Low Priority</option>
+                    <option value="medium" selected>Medium Priority</option>
+                    <option value="high">High Priority</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Default Task Category</label>
+                  <select id="defaultCategory" class="form-select">
+                    <option value="wellness" selected>Wellness</option>
+                    <option value="work">Work</option>
+                    <option value="education">Education</option>
+                    <option value="personal">Personal</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="savePreferences()">
+                  <i class="fas fa-save"></i> Save Preferences
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 2rem;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Account Security</h3>
+                <p class="card-subtitle">Manage your password and security settings</p>
+              </div>
+              <div class="card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                  <div>
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Change Password</h4>
+                    <form id="passwordForm">
+                      <div class="form-group">
+                        <label class="form-label" for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" class="form-input" required minlength="6">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" class="form-input" required minlength="6">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="confirmNewPassword">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" class="form-input" required minlength="6">
+                      </div>
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-key"></i> Update Password
+                      </button>
+                    </form>
+                  </div>
+                  <div>
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Data Management</h4>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                      <button class="btn btn-secondary" onclick="exportData()">
+                        <i class="fas fa-download"></i> Export My Data
+                      </button>
+                      <button class="btn btn-secondary" onclick="showAlert('clearData')">
+                        <i class="fas fa-trash-alt"></i> Clear All Tasks
+                      </button>
+                      <button class="btn btn-danger" onclick="showAlert('deleteAccount')">
+                        <i class="fas fa-user-times"></i> Delete Account Info
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="terms" class="dashboard-page">
+        <div class="content-header">
+          <h1>Terms of Service</h1>
+          <p>Please read these terms carefully before using ZenTrack.</p>
+        </div>
+        <div class="content-body">
+          <div class="legal-content">
+            <p><strong>Last updated:</strong> October 2025</p>
+            <h2>Acceptance of Terms</h2>
+            <p>By accessing and using ZenTrack, you accept and agree to be bound by the terms and provision of this agreement.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="signinModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal('signinModal')">×</span>
+      <h2>Welcome Back</h2>
+      <form id="signinForm">
+        <div class="form-group">
+          <label class="form-label" for="signinEmail">Email Address</label>
+          <input type="email" id="signinEmail" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signinPassword">Password</label>
+          <input type="password" id="signinPassword" class="form-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+      <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Don't have an account?</p>
+        <a href="#" onclick="switchModal('signinModal', 'signupModal')" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Create Account</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal('signupModal')">×</span>
+      <h2>Join ZenTrack</h2>
+      <form id="signupForm">
+        <div class="form-group">
+          <label class="form-label" for="signupEmail">Email Address</label>
+          <input type="email" id="signupEmail" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" class="form-input" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupConfirmPassword">Confirm Password</label>
+          <input type="password" id="signupConfirmPassword" class="form-input" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+      <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Already have an account?</p>
+        <a href="#" onclick="switchModal('signupModal', 'signinModal')" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="alertModal" class="alert-modal">
+    <div class="alert-content">
+      <h3 id="alertTitle">Confirm Action</h3>
+      <p id="alertMessage">Are you sure you want to proceed?</p>
+      <div class="alert-buttons">
+        <button class="btn btn-secondary" id="alertCancel">Cancel</button>
+        <button class="btn btn-primary" id="alertConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification" class="notification"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
