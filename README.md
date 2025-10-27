@@ -1,7 +1,5 @@
 # ZenTrack - Your Wellness Journey Companion
 
-![ZenTrack Banner](https://via.placeholder.com/1200x400/6366f1/ffffff?text=ZenTrack+-+Your+Wellness+Journey+Companion)
-
 A comprehensive wellness tracking application designed to help you build healthy habits, manage stress, and achieve your wellness goals through personalized tools and guidance.
 
 ## 🌟 Features
