@@ -1,2065 +1,1381 @@
-/* CSS Reset and Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+const SUPABASE_URL = 'https://jvjxqxwaixghvrztvmdf.supabase.co/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2anhxeHdhaXhnaHZyenR2bWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MzYyMjAsImV4cCI6MjA3NjIxMjIyMH0.Az9snZvkTKuLn4J5_1EFvOVUtdUtTlIRSmPzpZtSwIk';
+const EMAILJS_PUBLIC_KEY = 'kp5EB2ns-wnu8fWti';
+const EMAILJS_SERVICE_ID = 'service_u91m769';
+const EMAILJS_TEMPLATE_ID = 'template_f7o3lld';
 
-:root {
-    --primary-color: #6366f1;
-    --primary-dark: #4f46e5;
-    --secondary-color: #8b5cf6;
-    --accent-color: #06b6d4;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --error-color: #ef4444;
-    --fitness-color: #10b981;
-    --meditation-color: #3b82f6;
-    --nutrition-color: #f59e0b;
-    --dark-bg: #0f172a;
-    --dark-surface: #1e293b;
-    --dark-border: #334155;
-    --light-bg: #f8fafc;
-    --light-surface: #ffffff;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-light: #94a3b8;
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-}
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-[data-theme="dark"] {
-    --light-bg: #0f172a;
-    --light-surface: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-light: #64748b;
-    --border-color: #334155;
-}
+(function() {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+})();
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.6;
-    color: var(--text-primary);
-    background: var(--light-bg);
-    min-height: 100vh;
-    transition: all 0.3s ease;
-    overflow-x: hidden;
-}
+let currentUser = null;
+let tasks = [];
+let enrolledPrograms = [];
+let timerInterval = null;
+let timerSeconds = 0;
+let isTimerRunning = false;
+let currentAlertAction = null;
 
-/* Apply smooth transitions to all theme-dependent elements */
-* {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Landing Page Styles */
-.landing-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    position: relative;
-    overflow: hidden;
-}
-
-.landing-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-    opacity: 0.3;
-}
-
-/* Animated Background */
-.animated-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(-45deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
-    opacity: 0.8;
-    z-index: -1;
-}
-
-@keyframes gradient {
-    0% {
-        background-position: 0% 50%;
+const programTemplates = {
+    'fitness-30': {
+        name: '30-Day Fitness Challenge',
+        tasks: [
+            { title: 'Complete 20 push-ups', category: 'wellness', priority: 'medium' },
+            { title: '30-minute cardio workout', category: 'wellness', priority: 'high' },
+            { title: 'Drink 8 glasses of water', category: 'wellness', priority: 'low' },
+            { title: 'Track daily calories', category: 'wellness', priority: 'medium' },
+            { title: 'Get 8 hours of sleep', category: 'wellness', priority: 'high' }
+        ]
+    },
+    'meditation-21': {
+        name: 'Meditation Journey',
+        tasks: [
+            { title: '10-minute morning meditation', category: 'wellness', priority: 'high' },
+            { title: 'Practice deep breathing exercises', category: 'wellness', priority: 'medium' },
+            { title: 'Mindful eating during lunch', category: 'wellness', priority: 'low' },
+            { title: 'Evening gratitude journal', category: 'wellness', priority: 'medium' },
+            { title: 'Body scan meditation', category: 'wellness', priority: 'medium' }
+        ]
+    },
+    'nutrition-14': {
+        name: 'Healthy Nutrition Reset',
+        tasks: [
+            { title: 'Eat 5 servings of fruits/vegetables', category: 'wellness', priority: 'high' },
+            { title: 'Prepare healthy meal prep', category: 'wellness', priority: 'medium' },
+            { title: 'Avoid processed foods', category: 'wellness', priority: 'high' },
+            { title: 'Take daily vitamins', category: 'wellness', priority: 'low' },
+            { title: 'Plan tomorrow\'s meals', category: 'wellness', priority: 'medium' }
+        ]
+    },
+    'sleep-10': {
+        name: 'Sleep Optimization',
+        tasks: [
+            { title: 'Set consistent bedtime', category: 'wellness', priority: 'high' },
+            { title: 'No screens 1 hour before bed', category: 'wellness', priority: 'medium' },
+            { title: 'Create relaxing bedtime routine', category: 'wellness', priority: 'medium' },
+            { title: 'Keep bedroom cool and dark', category: 'wellness', priority: 'low' },
+            { title: 'Track sleep quality', category: 'wellness', priority: 'low' }
+        ]
     }
-    50% {
-        background-position: 100% 50%;
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthState();
+    loadTasks();
+    updateDashboard();
+    renderPrograms();
+    loadTheme();
+    loadUserPreferences();
+    
+    document.getElementById('signinForm').addEventListener('submit', handleSignIn);
+    document.getElementById('signupForm').addEventListener('submit', handleSignUp);
+    document.getElementById('contactForm').addEventListener('submit', handleContactForm);
+    document.getElementById('profileForm').addEventListener('submit', handleProfileUpdate);
+    document.getElementById('passwordForm').addEventListener('submit', handlePasswordChange);
+    
+    document.getElementById('alertCancel').addEventListener('click', closeAlert);
+    document.getElementById('alertConfirm').addEventListener('click', handleAlertConfirm);
+});
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
     }
-    100% {
-        background-position: 0% 50%;
+    if (overlay) {
+        overlay.classList.toggle('active');
     }
 }
 
-/* Particle Effect */
-.particles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    const themeIcons = document.querySelectorAll('.theme-toggle i');
+    themeIcons.forEach(icon => {
+        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    });
 }
 
-.particle {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    animation: float 20s infinite linear;
-}
-
-@keyframes float {
-    0% {
-        transform: translateY(0) translateX(0);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-1000%) translateX(1000%);
-        opacity: 0;
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    const themeIcons = document.querySelectorAll('.theme-toggle i');
+    themeIcons.forEach(icon => {
+        icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    });
+    
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) {
+        themeSelect.value = savedTheme;
     }
 }
 
-/* Navigation */
-.landing-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 1rem 0;
-}
-
-[data-theme="dark"] .landing-nav {
-    background: rgba(30, 41, 59, 0.95);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.nav-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0;
-}
-
-.logo i {
-    font-size: 2rem;
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-    align-items: center;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: var(--text-primary);
-    font-weight: 500;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-}
-
-.nav-links a:hover {
-    color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.1);
-}
-
-.auth-buttons {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-/* Buttons */
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.btn:hover::before {
-    left: 100%;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-    box-shadow: var(--shadow-md);
-}
-
-.btn-primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.btn-secondary {
-    background: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-}
-
-.btn-secondary:hover {
-    background: var(--primary-color);
-    color: white;
-    transform: translateY(-2px);
-}
-
-/* Hero Section */
-.hero {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 8rem 2rem 4rem;
-    color: white;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.hero h1 {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 800;
-    margin-bottom: 1.5rem;
-    line-height: 1.2;
-    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.hero p {
-    font-size: 1.25rem;
-    margin-bottom: 3rem;
-    opacity: 0.9;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
-}
-
-.hero-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    align-items: center;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.hero-buttons .btn {
-    padding: 1rem 2rem;
-    font-size: 1rem;
-}
-
-/* Features Section */
-.features {
-    position: relative;
-    z-index: 1;
-    padding: 4rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
-}
-
-.feature-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: var(--shadow-xl);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-[data-theme="dark"] .feature-card {
-    background: rgba(30, 41, 59, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-}
-
-.feature-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
-}
-
-.feature-icon {
-    width: 4rem;
-    height: 4rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-radius: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-    margin-bottom: 1.5rem;
-}
-
-.feature-card h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-}
-
-.feature-card p {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-}
-
-/* Dashboard Layout */
-.dashboard-layout {
-    display: none;
-    min-height: 100vh;
-    background: var(--light-bg);
-}
-
-.dashboard-layout.active {
-    display: flex;
-}
-
-.sidebar {
-    width: 280px;
-    background: var(--light-surface);
-    border-right: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    z-index: 100;
-    transition: transform 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-header {
-    padding: 2rem 1.5rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--primary-color);
-}
-
-.sidebar-logo i {
-    font-size: 1.75rem;
-}
-
-.sidebar-nav {
-    padding: 1rem 0;
-    flex: 1;
-    overflow-y: auto;
-}
-
-.nav-section {
-    margin-bottom: 2rem;
-}
-
-.nav-section-title {
-    padding: 0 1.5rem 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-light);
-    text-align: left;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.5rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-    font-weight: 500;
-    text-align: left;
-}
-
-.nav-item:hover {
-    background: rgba(99, 102, 241, 0.05);
-    color: var(--primary-color);
-    border-left-color: var(--primary-color);
-}
-
-.nav-item.active {
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--primary-color);
-    border-left-color: var(--primary-color);
-}
-
-.nav-item i {
-    width: 1.25rem;
-    text-align: center;
-}
-
-.user-section {
-    padding: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    background: var(--light-surface);
-    margin-top: auto;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.user-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-}
-
-.user-details h4 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.user-details p {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-
-.logout-btn {
-    width: 100%;
-    background: var(--error-color);
-    color: white;
-    border: none;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.logout-btn:hover {
-    background: #dc2626;
-}
-
-.main-content {
-    flex: 1;
-    margin-left: 280px;
-    min-height: 100vh;
-    background: var(--light-bg);
-}
-
-.content-header {
-    background: var(--light-surface);
-    border-bottom: 1px solid var(--border-color);
-    padding: 2rem;
-    box-shadow: var(--shadow-sm);
-    text-align: left;
-}
-
-.content-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.content-header p {
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
-
-.content-body {
-    padding: 2rem;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: var(--light-surface);
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.stat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
-
-.stat-icon {
-    width: 3rem;
-    height: 3rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-radius: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
-}
-
-.stat-number {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.stat-label {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-/* Quick Actions */
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.quick-action-card {
-    background: var(--light-surface);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-sm);
-}
-
-.quick-action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-color);
-}
-
-.quick-action-icon {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-/* Motivational Quote */
-.motivational-quote {
-    background: var(--light-surface);
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    margin-bottom: 2rem;
-    text-align: center;
-    font-style: italic;
-    position: relative;
-}
-
-.motivational-quote::before, .motivational-quote::after {
-    content: '"';
-    font-size: 3rem;
-    color: var(--primary-color);
-    opacity: 0.3;
-    position: absolute;
-}
-
-.motivational-quote::before {
-    top: 0.5rem;
-    left: 1rem;
-}
-
-.motivational-quote::after {
-    bottom: 0.5rem;
-    right: 1rem;
-}
-
-/* Progress Bar */
-.progress-bar {
-    height: 8px;
-    background: var(--light-bg);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 0.5rem;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    border-radius: 4px;
-    transition: width 0.5s ease;
-}
-
-/* Task Management */
-.task-form {
-    background: var(--light-surface);
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 2rem;
-}
-
-.task-form-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
-    gap: 1rem;
-    align-items: end;
-}
-
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.form-group:last-child {
-    margin-bottom: 0;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    text-align: left;
-}
-
-.form-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-    background: var(--light-surface);
-    color: var(--text-primary);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.form-select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    background: var(--light-surface);
-    color: var(--text-primary);
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%236366f1' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 0.65rem;
-}
-
-.task-filters {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-}
-
-.filter-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--border-color);
-    background: var(--light-surface);
-    color: var(--text-secondary);
-    border-radius: 2rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-    font-size: 0.875rem;
-}
-
-.filter-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.filter-btn.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
-.task-item {
-    background: var(--light-surface);
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    border: 1px solid var(--border-color);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: all 0.2s ease;
-    position: relative;
-    cursor: grab;
-}
-
-.task-item:active {
-    cursor: grabbing;
-}
-
-.task-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    border-radius: 0.75rem 0 0 0.75rem;
-}
-
-.task-item.high::before {
-    background: var(--error-color);
-}
-
-.task-item.medium::before {
-    background: var(--warning-color);
-}
-
-.task-item.low::before {
-    background: var(--success-color);
-}
-
-.task-item.completed {
-    opacity: 0.6;
-}
-
-.task-item:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
-}
-
-.task-complete-btn {
-    width: 2rem;
-    height: 2rem;
-    border: 2px solid var(--border-color);
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: transparent;
-}
-
-.task-complete-btn:hover {
-    border-color: var(--success-color);
-    background: rgba(16, 185, 129, 0.1);
-}
-
-.task-complete-btn.completed {
-    background: var(--success-color);
-    border-color: var(--success-color);
-    color: white;
-}
-
-.task-content {
-    flex: 1;
-    text-align: left;
-}
-
-.task-title {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.task-meta {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.task-badge {
-    padding: 0.125rem 0.5rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.task-badge.high {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--error-color);
-}
-
-.task-badge.medium {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--warning-color);
-}
-
-.task-badge.low {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--success-color);
-}
-
-.task-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-    border-radius: 0.375rem;
-}
-
-.btn-danger {
-    background: var(--error-color);
-    color: white;
-    border: none;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-}
-
-/* Task Notes */
-.task-notes {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-
-.task-notes.expanded {
-    max-height: 100px;
-}
-
-.notes-toggle {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-size: 0.75rem;
-    margin-top: 0.5rem;
-}
-
-/* Timer */
-.timer-container {
-    background: var(--light-surface);
-    padding: 3rem;
-    border-radius: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
-    text-align: center;
-    max-width: 600px;
-    margin: 0 auto 3rem;
-}
-
-.timer-display {
-    font-size: 4rem;
-    font-weight: 800;
-    color: var(--primary-color);
-    margin: 2rem 0;
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
-    text-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
-}
-
-.timer-inputs {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.timer-input-group {
-    text-align: center;
-}
-
-.timer-input-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-}
-
-.timer-input {
-    width: 80px;
-    padding: 0.75rem;
-    text-align: center;
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    background: var(--light-bg);
-    color: var(--text-primary);
-}
-
-.timer-controls {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-/* Interval Timer */
-.interval-timer {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.timer-history {
-    margin-top: 2rem;
-}
-
-.timer-history-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.timer-history-item:last-child {
-    border-bottom: none;
-}
-
-/* Preset Timers */
-.preset-timers {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-}
-
-.preset-card {
-    background: var(--light-surface);
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-sm);
-}
-
-.preset-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary-color);
-}
-
-.preset-card h4 {
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.preset-card p {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-}
-
-/* Programs */
-.programs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
-}
-
-.program-card {
-    background: var(--light-surface);
-    border-radius: 1.5rem;
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
-}
-
-.program-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-xl);
-}
-
-.program-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    padding: 2rem;
-    position: relative;
-}
-
-.program-header::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-}
-
-.program-duration {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 0.375rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: inline-block;
-    margin-bottom: 1rem;
-}
-
-.program-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.program-body {
-    padding: 2rem;
-}
-
-.program-description {
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-}
-
-.program-features {
-    list-style: none;
-    margin-bottom: 2rem;
-}
-
-.program-features li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    color: var(--text-secondary);
-}
-
-.program-features li::before {
-    content: '✓';
-    color: var(--success-color);
-    font-weight: bold;
-    width: 1rem;
-}
-
-.program-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-/* Resources */
-.resources-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2rem;
-}
-
-.resource-section {
-    background: var(--light-surface);
-    padding: 2rem;
-    border-radius: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-}
-
-.resource-section h3 {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-    font-size: 1.25rem;
-    font-weight: 700;
-    text-align: left;
-}
-
-.resource-item {
-    padding: 1.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.resource-item:last-child {
-    border-bottom: none;
-}
-
-.resource-item h4 {
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    text-align: left;
-}
-
-.resource-item p {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    line-height: 1.5;
-    text-align: left;
-}
-
-/* FAQ */
-.faq-item {
-    background: var(--light-surface);
-    margin-bottom: 1rem;
-    border-radius: 0.75rem;
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-}
-
-.faq-question {
-    background: var(--light-bg);
-    padding: 1.5rem;
-    cursor: pointer;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.2s ease;
-    text-align: left;
-}
-
-.faq-question:hover {
-    background: rgba(99, 102, 241, 0.05);
-}
-
-.faq-answer {
-    padding: 0 1.5rem;
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.faq-answer.active {
-    padding: 1.5rem;
-    max-height: 200px;
-}
-
-.faq-icon {
-    transition: transform 0.3s ease;
-}
-
-.faq-question.active .faq-icon {
-    transform: rotate(45deg);
-}
-
-/* Modals */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-}
-
-.modal-content {
-    background: var(--light-surface);
-    margin: 5% auto;
-    padding: 3rem;
-    border-radius: 1.5rem;
-    width: 90%;
-    max-width: 450px;
-    position: relative;
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--border-color);
-}
-
-.modal-close {
-    position: absolute;
-    right: 1.5rem;
-    top: 1.5rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-light);
-    transition: color 0.2s ease;
-}
-
-.modal-close:hover {
-    color: var(--text-primary);
-}
-
-.modal h2 {
-    margin-bottom: 2rem;
-    color: var(--text-primary);
-    font-weight: 700;
-}
-
-/* Notifications */
-.notification {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    color: white;
-    z-index: 3000;
-    transform: translateX(400px);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.4s ease;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-weight: 500;
-}
-
-.notification.show {
-    transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.notification.success {
-    background: var(--success-color);
-}
-
-.notification.error {
-    background: var(--error-color);
-}
-
-/* Contact Form */
-.contact-form {
-    background: var(--light-surface);
-    padding: 3rem;
-    border-radius: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.contact-form textarea {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 120px;
-    background: var(--light-surface);
-    color: var(--text-primary);
-}
-
-/* Legal Content */
-.legal-content {
-    background: var(--light-surface);
-    padding: 3rem;
-    border-radius: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    max-width: 800px;
-    margin: 0 auto;
-    line-height: 1.7;
-    text-align: left;
-}
-
-.legal-content h1 {
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-    font-weight: 700;
-}
-
-.legal-content h2 {
-    color: var(--text-primary);
-    margin: 2rem 0 1rem;
-    font-weight: 600;
-}
-
-.legal-content h3 {
-    color: var(--text-primary);
-    margin: 1.5rem 0 0.75rem;
-    font-weight: 600;
-}
-
-.legal-content ul {
-    margin: 1rem 0;
-    padding-left: 2rem;
-}
-
-.legal-content li {
-    margin-bottom: 0.5rem;
-    color: var(--text-secondary);
-}
-
-/* Mobile Menu */
-.mobile-menu-btn {
-    display: none;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 200;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    box-shadow: var(--shadow-md);
-}
-
-.mobile-sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-    backdrop-filter: blur(4px);
-}
-
-.mobile-sidebar-overlay.active {
-    display: block;
-}
-
-/* Mobile Navigation */
-.mobile-nav {
-    display: none;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--light-surface);
-    border-radius: 1rem;
-    margin-top: 1rem;
-}
-
-.mobile-nav a {
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    background: var(--light-bg);
-    text-decoration: none;
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-/* Mobile Bottom Navigation */
-.mobile-bottom-nav {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--light-surface);
-    border-top: 1px solid var(--border-color);
-    padding: 0.5rem;
-    z-index: 100;
-}
-
-.mobile-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    padding: 0.5rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 0.75rem;
-}
-
-.mobile-nav-item.active {
-    color: var(--primary-color);
-}
-
-.mobile-nav-item i {
-    font-size: 1.25rem;
-    margin-bottom: 0.25rem;
-}
-
-/* Theme Toggle */
-.theme-toggle {
-    background: transparent;
-    border: 2px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.theme-toggle:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-/* Alert Modal */
-.alert-modal {
-    display: none;
-    position: fixed;
-    z-index: 4000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-}
-
-.alert-content {
-    background: var(--light-surface);
-    margin: 20% auto;
-    padding: 2rem;
-    border-radius: 1.5rem;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--border-color);
-}
-
-.alert-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2rem;
-}
-
-/* Search Box */
-.search-box {
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    background: var(--light-surface);
-    color: var(--text-primary);
-    width: 100%;
-    margin-bottom: 1rem;
-}
-
-.search-box:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-/* Sort Controls */
-.sort-controls {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-}
-
-.sort-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--border-color);
-    background: var(--light-surface);
-    color: var(--text-secondary);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-    font-size: 0.875rem;
-}
-
-.sort-btn.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
-.sort-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-/* Character Counter */
-.character-counter {
-    font-size: 0.75rem;
-    color: var(--text-light);
-    text-align: right;
-    margin-top: 0.25rem;
-}
-
-.character-counter.warning {
-    color: var(--warning-color);
-}
-
-.character-counter.error {
-    color: var(--error-color);
-}
-
-/* Onboarding Wizard */
-.onboarding-wizard {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 5000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.wizard-content {
-    background: var(--light-surface);
-    padding: 3rem;
-    border-radius: 1.5rem;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.wizard-step {
-    display: none;
-}
-
-.wizard-step.active {
-    display: block;
-}
-
-.wizard-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-}
-
-/* Tooltip */
-.tooltip {
-    position: relative;
-    display: inline-block;
-}
-
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: 200px;
-    background-color: var(--dark-bg);
-    color: white;
-    text-align: center;
-    border-radius: 6px;
-    padding: 0.5rem;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
-}
-
-/* Circular Progress */
-.circular-progress {
-    width: 120px;
-    height: 120px;
-    position: relative;
-    margin: 0 auto 1rem;
-}
-
-.circular-progress svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-}
-
-.circular-progress-bg {
-    fill: none;
-    stroke: var(--light-bg);
-    stroke-width: 8;
-}
-
-.circular-progress-fill {
-    fill: none;
-    stroke: var(--primary-color);
-    stroke-width: 8;
-    stroke-linecap: round;
-    stroke-dasharray: 283;
-    stroke-dashoffset: 283;
-    transition: stroke-dashoffset 0.5s ease;
-}
-
-.circular-progress-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-/* Heatmap */
-.heatmap {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.25rem;
-    margin: 1rem 0;
-}
-
-.heatmap-day {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 0.25rem;
-    background: var(--light-bg);
-    transition: all 0.3s ease;
-}
-
-.heatmap-day.active {
-    background: var(--primary-color);
-}
-
-/* Milestone Celebration */
-.milestone-celebration {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 6000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: white;
-    text-align: center;
-}
-
-.confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: var(--primary-color);
-    animation: confetti-fall 5s linear forwards;
-}
-
-@keyframes confetti-fall {
-    0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
+function changeTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    const themeIcons = document.querySelectorAll('.theme-toggle i');
+    themeIcons.forEach(icon => {
+        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    });
+}
+
+async function checkAuthState() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        currentUser = user;
+        showDashboard();
+        loadUserData();
     }
 }
 
-/* Skeleton Loading */
-.skeleton {
-    background: linear-gradient(90deg, var(--light-bg) 25%, var(--border-color) 50%, var(--light-bg) 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 0.25rem;
-}
-
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-secondary);
-}
-
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-/* Bulk Actions */
-.bulk-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-/* Keyboard Shortcuts */
-.keyboard-shortcuts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.shortcut-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.shortcut-keys {
-    display: flex;
-    gap: 0.25rem;
-}
-
-.key {
-    background: var(--light-bg);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid var(--border-color);
-}
-
-/* Font Size Controls */
-.font-size-controls {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.font-size-btn {
-    width: 2rem;
-    height: 2rem;
-    border: 1px solid var(--border-color);
-    background: var(--light-surface);
-    border-radius: 0.25rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.font-size-btn.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .main-content {
-        margin-left: 0;
-    }
-
-    .mobile-menu-btn {
-        display: block;
-    }
-
-    .task-form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .mobile-bottom-nav {
-        display: flex;
+function showDashboard() {
+    document.getElementById('home').classList.remove('active');
+    document.getElementById('about').classList.remove('active');
+    document.getElementById('dashboardLayout').classList.add('active');
+    
+    const email = currentUser.email;
+    document.getElementById('userEmail').textContent = email;
+    document.getElementById('userName').textContent = email.split('@')[0];
+    document.getElementById('userAvatar').textContent = email.charAt(0).toUpperCase();
+    
+    const savedAvatar = localStorage.getItem(`userAvatar_${currentUser.id}`);
+    if (savedAvatar) {
+        const userAvatar = document.getElementById('userAvatar');
+        const settingsAvatar = document.getElementById('settingsAvatar');
+        if (userAvatar) {
+            userAvatar.style.backgroundImage = `url(${savedAvatar})`;
+            userAvatar.style.backgroundSize = 'cover';
+            userAvatar.style.backgroundPosition = 'center';
+            userAvatar.textContent = '';
+        }
+        if (settingsAvatar) {
+            settingsAvatar.style.backgroundImage = `url(${savedAvatar})`;
+            settingsAvatar.style.backgroundSize = 'cover';
+            settingsAvatar.style.backgroundPosition = 'center';
+            settingsAvatar.textContent = '';
+        }
     }
 }
 
-@media (max-width: 768px) {
-    .nav-links {
-        display: none;
+function showLanding() {
+    document.getElementById('home').classList.add('active');
+    document.getElementById('about').classList.remove('active');
+    document.getElementById('dashboardLayout').classList.remove('active');
+}
+
+async function handleSignIn(e) {
+    e.preventDefault();
+    const email = document.getElementById('signinEmail').value;
+    const password = document.getElementById('signinPassword').value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        showNotification('Sign in failed: ' + error.message, 'error');
+    } else {
+        currentUser = data.user;
+        showNotification('Successfully signed in!', 'success');
+        closeModal('signinModal');
+        showDashboard();
+        loadUserData();
+    }
+}
+
+async function handleSignUp(e) {
+    e.preventDefault();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+    if (password !== confirmPassword) {
+        showNotification('Passwords do not match', 'error');
+        return;
     }
 
-    .mobile-nav {
-        display: flex;
-    }
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password
+    });
 
-    .hero h1 {
-        font-size: 2.5rem;
+    if (error) {
+        showNotification('Sign up failed: ' + error.message, 'error');
+    } else {
+        showNotification('Account created successfully! Please check your email for verification.', 'success');
+        closeModal('signupModal');
     }
+}
 
-    .hero-buttons {
-        flex-direction: column;
-        align-items: center;
+async function logout() {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+        currentUser = null;
+        tasks = [];
+        enrolledPrograms = [];
+        showLanding();
+        showNotification('Successfully logged out', 'success');
     }
+}
 
-    .features-grid {
-        grid-template-columns: 1fr;
+async function loadUserData() {
+    if (!currentUser) return;
+    
+    try {
+        const { data: tasksData, error: tasksError } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', currentUser.id);
+
+        if (!tasksError && tasksData) {
+            tasks = tasksData;
+        }
+
+        const { data: programsData, error: programsError } = await supabase
+            .from('user_programs')
+            .select('*')
+            .eq('user_id', currentUser.id);
+
+        if (!programsError && programsData) {
+            enrolledPrograms = programsData;
+        }
+
+        updateDashboard();
+        renderTasks();
+        renderPrograms();
+    } catch (error) {
+        console.error('Error loading user data:', error);
     }
+}
 
-    .timer-display {
-        font-size: 2.5rem;
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    document.getElementById(pageId).classList.add('active');
+    
+    if (window.innerWidth <= 1024) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
     }
+}
 
-    .timer-inputs {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .content-header {
-        padding: 1.5rem;
-    }
-
-    .content-body {
-        padding: 1.5rem;
-    }
-
-    .programs-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .resources-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .search-box {
-        margin-bottom: 0.5rem;
+function showDashboardPage(pageId) {
+    document.querySelectorAll('.dashboard-page').forEach(page => {
+        page.classList.remove('active');
+    });
+    document.getElementById(pageId).classList.add('active');
+    
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const clickedNavItem = document.querySelector(`[onclick="showDashboardPage('${pageId}')"]`);
+    if (clickedNavItem) {
+        clickedNavItem.classList.add('active');
     }
     
-    .sort-controls {
-        gap: 0.25rem;
+    if (pageId === 'dashboard' || pageId === 'progress') {
+        updateDashboard();
     }
     
-    .sort-btn {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.75rem;
-    }
-
-    .btn, .nav-item, .filter-btn {
-        min-height: 44px;
-        min-width: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .notification {
-        top: 1rem;
-        right: 1rem;
-        left: 1rem;
-        width: calc(100% - 2rem);
+    if (pageId === 'settings') {
+        loadSettings();
     }
     
-    .nav-content {
-        padding: 0 1rem;
-        flex-wrap: wrap;
+    if (pageId === 'programs') {
+        renderPrograms();
     }
     
-    .logo {
-        margin-right: auto;
-        padding: 0.5rem 0;
+    if (window.innerWidth <= 1024) {
+        toggleSidebar();
+    }
+}
+
+async function addTask() {
+    if (!currentUser) {
+        showNotification('Please sign in to add tasks', 'error');
+        return;
+    }
+
+    const title = document.getElementById('taskTitle').value.trim();
+    const priority = document.getElementById('taskPriority').value;
+    const category = document.getElementById('taskCategory').value;
+    const dueDate = document.getElementById('taskDueDate').value;
+
+    if (!title) {
+        showNotification('Please enter a task title', 'error');
+        return;
+    }
+
+    const newTask = {
+        user_id: currentUser.id,
+        title: title,
+        priority: priority,
+        category: category,
+        due_date: dueDate || null,
+        completed: false,
+        created_at: new Date().toISOString()
+    };
+
+    try {
+        const { data, error } = await supabase
+            .from('tasks')
+            .insert([newTask])
+            .select();
+
+        if (error) throw error;
+
+        tasks.push(data[0]);
+        renderTasks();
+        updateDashboard();
+        
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDueDate').value = '';
+        
+        showNotification('Task added successfully!', 'success');
+    } catch (error) {
+        showNotification('Error adding task: ' + error.message, 'error');
+    }
+}
+
+async function toggleTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const updatedTask = { ...task, completed: !task.completed };
+
+    try {
+        const { error } = await supabase
+            .from('tasks')
+            .update({ 
+                completed: updatedTask.completed,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', taskId);
+
+        if (error) throw error;
+
+        const taskIndex = tasks.findIndex(t => t.id === taskId);
+        tasks[taskIndex] = updatedTask;
+        
+        renderTasks();
+        updateDashboard();
+        
+        showNotification(updatedTask.completed ? 'Task completed!' : 'Task marked as pending', 'success');
+    } catch (error) {
+        showNotification('Error updating task: ' + error.message, 'error');
+    }
+}
+
+async function deleteTask(taskId) {
+    showAlert('deleteTask', 'Delete Task', 'Are you sure you want to delete this task?', taskId);
+}
+
+function renderTasks(filter = 'all') {
+    const tasksList = document.getElementById('tasksList');
+    if (!tasksList) return;
+    
+    let filteredTasks = tasks;
+
+    switch (filter) {
+        case 'pending':
+            filteredTasks = tasks.filter(t => !t.completed);
+            break;
+        case 'completed':
+            filteredTasks = tasks.filter(t => t.completed);
+            break;
+        case 'high':
+            filteredTasks = tasks.filter(t => t.priority === 'high');
+            break;
+        case 'wellness':
+        case 'work':
+        case 'education':
+        case 'personal':
+            filteredTasks = tasks.filter(t => t.category === filter);
+            break;
+    }
+
+    if (filteredTasks.length === 0) {
+        tasksList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No tasks found for this filter.</p>';
+        return;
+    }
+
+    tasksList.innerHTML = filteredTasks.map(task => `
+        <div class="task-item ${task.completed ? 'completed' : ''} ${task.priority}">
+            <button class="task-complete-btn ${task.completed ? 'completed' : ''}" onclick="toggleTask('${task.id}')">
+                <i class="fas fa-check"></i>
+            </button>
+            <div class="task-content">
+                <div class="task-title">${task.title}</div>
+                <div class="task-meta">
+                    <span class="task-badge ${task.priority}">${task.priority}</span>
+                    <span>${task.category}</span>
+                    ${task.due_date ? `<span>Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn btn-danger btn-sm" onclick="deleteTask('${task.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterTasks(filter) {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    renderTasks(filter);
+}
+
+function renderPrograms() {
+    const programsGrid = document.getElementById('programsGrid');
+    if (!programsGrid) return;
+
+    programsGrid.innerHTML = Object.entries(programTemplates).map(([programId, program]) => {
+        const isEnrolled = enrolledPrograms.some(p => p.program_id === programId);
+        
+        return `
+            <div class="program-card">
+                <div class="program-header">
+                    <div class="program-duration">${programId.includes('30') ? '30' : programId.includes('21') ? '21' : programId.includes('14') ? '14' : '10'} Days</div>
+                    <h3 class="program-title">${program.name}</h3>
+                </div>
+                <div class="program-body">
+                    <p class="program-description">${getProgramDescription(programId)}</p>
+                    <ul class="program-features">
+                        ${program.tasks.slice(0, 4).map(task => `<li>${task.title}</li>`).join('')}
+                    </ul>
+                    <div class="program-actions">
+                        ${isEnrolled ? 
+                            `<button class="btn btn-primary" onclick="showAlert('unenrollProgram', 'Unenroll Program', 'Are you sure you want to unenroll from this program? This will also remove all associated tasks.', '${programId}')">
+                                <i class="fas fa-times"></i> Unenroll
+                            </button>
+                            <button class="btn btn-secondary" onclick="showDashboardPage('tasks')">
+                                <i class="fas fa-tasks"></i> View Tasks
+                            </button>` :
+                            `<button class="btn btn-primary" onclick="enrollProgram('${programId}')">
+                                <i class="fas fa-play"></i> Enroll Now
+                            </button>`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getProgramDescription(programId) {
+    const descriptions = {
+        'fitness-30': 'A comprehensive fitness program designed to build strength, endurance, and healthy habits over 30 days.',
+        'meditation-21': 'Develop a consistent meditation practice with guided sessions and mindfulness exercises.',
+        'nutrition-14': 'Reset your eating habits with a structured nutrition program focused on whole foods and balanced meals.',
+        'sleep-10': 'Improve your sleep quality and establish healthy sleep habits for better overall wellness.'
+    };
+    return descriptions[programId] || 'A wellness program designed to help you achieve your goals.';
+}
+
+async function enrollProgram(programId) {
+    if (!currentUser) {
+        showNotification('Please sign in to enroll in programs', 'error');
+        return;
+    }
+
+    const program = programTemplates[programId];
+    if (!program) return;
+
+    try {
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .upsert({
+                id: currentUser.id,
+                email: currentUser.email,
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'id'
+            });
+
+        if (userError) throw userError;
+
+        const existingEnrollment = enrolledPrograms.find(p => p.program_id === programId);
+        if (existingEnrollment) {
+            showNotification('You are already enrolled in this program', 'error');
+            return;
+        }
+
+        const { data: enrollmentData, error: enrollmentError } = await supabase
+            .from('user_programs')
+            .insert([{
+                user_id: currentUser.id,
+                program_id: programId,
+                program_name: program.name,
+                enrolled_at: new Date().toISOString()
+            }])
+            .select();
+
+        if (enrollmentError) throw enrollmentError;
+
+        enrolledPrograms.push(enrollmentData[0]);
+
+        const programTasks = program.tasks.map(task => ({
+            user_id: currentUser.id,
+            title: task.title,
+            category: task.category,
+            priority: task.priority,
+            completed: false,
+            created_at: new Date().toISOString(),
+            program_id: programId
+        }));
+
+        const { data: tasksData, error: tasksError } = await supabase
+            .from('tasks')
+            .insert(programTasks)
+            .select();
+
+        if (tasksError) throw tasksError;
+
+        tasks.push(...tasksData);
+        
+        updateDashboard();
+        renderPrograms();
+        showNotification(`Successfully enrolled in ${program.name}!`, 'success');
+    } catch (error) {
+        console.error('Error enrolling in program:', error);
+        showNotification('Error enrolling in program: ' + error.message, 'error');
+    }
+}
+
+async function unenrollProgram(programId) {
+    if (!currentUser) {
+        showNotification('Please sign in to manage programs', 'error');
+        return;
+    }
+
+    try {
+        const { error: tasksError } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('user_id', currentUser.id)
+            .eq('program_id', programId);
+
+        if (tasksError) throw tasksError;
+
+        const { error: programError } = await supabase
+            .from('user_programs')
+            .delete()
+            .eq('user_id', currentUser.id)
+            .eq('program_id', programId);
+
+        if (programError) throw programError;
+
+        enrolledPrograms = enrolledPrograms.filter(p => p.program_id !== programId);
+        tasks = tasks.filter(t => t.program_id !== programId);
+        
+        updateDashboard();
+        renderTasks();
+        renderPrograms();
+        
+        showNotification('Successfully unenrolled from program!', 'success');
+    } catch (error) {
+        console.error('Error unenrolling from program:', error);
+        showNotification('Error unenrolling from program: ' + error.message, 'error');
+    }
+}
+
+function updateTimerDisplay() {
+    const hours = Math.floor(timerSeconds / 3600);
+    const minutes = Math.floor((timerSeconds % 3600) / 60);
+    const seconds = timerSeconds % 60;
+    
+    document.getElementById('timerDisplay').textContent = 
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+    if (!isTimerRunning) {
+        if (timerSeconds === 0) {
+            const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            timerSeconds = hours * 3600 + minutes * 60 + seconds;
+        }
+        
+        if (timerSeconds > 0) {
+            isTimerRunning = true;
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                
+                if (timerSeconds <= 0) {
+                    pauseTimer();
+                    showNotification('Timer finished!', 'success');
+                }
+            }, 1000);
+        }
+    }
+}
+
+function pauseTimer() {
+    isTimerRunning = false;
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function resetTimer() {
+    pauseTimer();
+    timerSeconds = 0;
+    updateTimerDisplay();
+    document.getElementById('hoursInput').value = 0;
+    document.getElementById('minutesInput').value = 0;
+    document.getElementById('secondsInput').value = 0;
+}
+
+function setPresetTimer(hours, minutes, seconds) {
+    resetTimer();
+    document.getElementById('hoursInput').value = hours;
+    document.getElementById('minutesInput').value = minutes;
+    document.getElementById('secondsInput').value = seconds;
+    timerSeconds = hours * 3600 + minutes * 60 + seconds;
+    updateTimerDisplay();
+}
+
+function calculateStreak() {
+    if (!tasks.length) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let streak = 0;
+    let currentDate = new Date(today);
+    
+    while (streak < 365) {
+        const dateString = currentDate.toISOString().split('T')[0];
+        
+        const hasCompletedTasks = tasks.some(task => {
+            if (!task.completed) return false;
+            
+            const taskDateField = task.updated_at || task.created_at;
+            if (!taskDateField) return false;
+            
+            const taskDate = new Date(taskDateField).toISOString().split('T')[0];
+            return taskDate === dateString;
+        });
+        
+        if (hasCompletedTasks) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+            currentDate.setHours(0, 0, 0, 0);
+        } else {
+            break;
+        }
     }
     
-    .auth-buttons {
-        margin-left: auto;
-        gap: 0.5rem;
+    return streak;
+}
+
+function updateDashboard() {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.completed).length;
+    const activePrograms = enrolledPrograms.length;
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    const currentStreak = calculateStreak();
+    const totalPoints = completedTasks * 10 + activePrograms * 50;
+
+    const totalTasksEl = document.getElementById('totalTasks');
+    const completedTasksEl = document.getElementById('completedTasks');
+    const activeProgramsEl = document.getElementById('activePrograms');
+    const completionRateEl = document.getElementById('completionRate');
+
+    if (totalTasksEl) totalTasksEl.textContent = totalTasks;
+    if (completedTasksEl) completedTasksEl.textContent = completedTasks;
+    if (activeProgramsEl) activeProgramsEl.textContent = activePrograms;
+    if (completionRateEl) completionRateEl.textContent = completionRate + '%';
+
+    const progressTotalTasksEl = document.getElementById('progressTotalTasks');
+    const progressCompletedTasksEl = document.getElementById('progressCompletedTasks');
+    const progressActiveProgramsEl = document.getElementById('progressActivePrograms');
+    const progressCompletionRateEl = document.getElementById('progressCompletionRate');
+    const currentStreakEl = document.getElementById('currentStreak');
+    const totalPointsEl = document.getElementById('totalPoints');
+
+    if (progressTotalTasksEl) progressTotalTasksEl.textContent = totalTasks;
+    if (progressCompletedTasksEl) progressCompletedTasksEl.textContent = completedTasks;
+    if (progressActiveProgramsEl) progressActiveProgramsEl.textContent = activePrograms;
+    if (progressCompletionRateEl) progressCompletionRateEl.textContent = completionRate + '%';
+    if (currentStreakEl) currentStreakEl.textContent = currentStreak;
+    if (totalPointsEl) totalPointsEl.textContent = totalPoints;
+
+    const categories = ['wellness', 'work', 'education', 'personal'];
+    categories.forEach(category => {
+        const count = tasks.filter(t => t.category === category).length;
+        const element = document.getElementById(category + 'Count');
+        if (element) element.textContent = count;
+    });
+
+    updateWelcomeMessage();
+    updateWellnessScore(completionRate, currentStreak, totalTasks);
+    updateCharts();
+    updateRecentActivities();
+
+    const recentTasks = tasks.slice(-5).reverse();
+    const recentTasksHtml = recentTasks.length > 0 ? recentTasks.map(task => `
+        <div class="task-item ${task.completed ? 'completed' : ''} ${task.priority}">
+            <div class="task-content">
+                <div class="task-title">${task.title}</div>
+                <div class="task-meta">
+                    <span class="task-badge ${task.priority}">${task.priority}</span>
+                    <span>${task.category}</span>
+                </div>
+            </div>
+        </div>
+    `).join('') : '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No recent tasks. Start by adding your first wellness goal!</p>';
+    
+    const recentTasksEl = document.getElementById('recentTasks');
+    if (recentTasksEl) recentTasksEl.innerHTML = recentTasksHtml;
+    
+    const recentCompletedTasks = tasks.filter(t => t.completed).slice(-5).reverse();
+    const progressTasksHtml = recentCompletedTasks.length > 0 ? recentCompletedTasks.map(task => `
+        <div class="task-item completed ${task.priority}">
+            <div class="task-content">
+                <div class="task-title">${task.title}</div>
+                <div class="task-meta">
+                    <span class="task-badge ${task.priority}">${task.priority}</span>
+                    <span>${task.category}</span>
+                </div>
+            </div>
+        </div>
+    `).join('') : '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Complete some tasks to see your achievements here!</p>';
+    
+    const progressRecentTasksEl = document.getElementById('progressRecentTasks');
+    if (progressRecentTasksEl) progressRecentTasksEl.innerHTML = progressTasksHtml;
+
+    updateBadges(completedTasks, currentStreak, totalTasks);
+}
+
+function updateWelcomeMessage() {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const dailyTip = document.getElementById('dailyTip');
+    
+    if (!welcomeMessage || !dailyTip) return;
+    
+    const hour = new Date().getHours();
+    let greeting = "Good evening";
+    
+    if (hour < 12) greeting = "Good morning";
+    else if (hour < 18) greeting = "Good afternoon";
+    
+    const userName = localStorage.getItem('userName') || currentUser.email.split('@')[0];
+    welcomeMessage.textContent = `${greeting}, ${userName}!`;
+    
+    const tips = [
+        "Your daily wellness tip: Take a 5-minute break to stretch and breathe deeply.",
+        "Tip: Stay hydrated! Drink a glass of water to boost your energy.",
+        "Wellness reminder: Practice gratitude by writing down three things you're thankful for today.",
+        "Health tip: Try to get at least 7-8 hours of quality sleep tonight.",
+        "Mindfulness tip: Take a moment to focus on your breathing and clear your mind."
+    ];
+    
+    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    dailyTip.textContent = randomTip;
+}
+
+function updateWellnessScore(completionRate, streak, totalTasks) {
+    const wellnessScoreEl = document.getElementById('wellnessScore');
+    if (!wellnessScoreEl) return;
+    
+    let score = completionRate;
+    
+    if (streak >= 7) score += 10;
+    else if (streak >= 3) score += 5;
+    
+    if (totalTasks >= 10) score += 10;
+    else if (totalTasks >= 5) score += 5;
+    
+    score = Math.min(score, 100);
+    
+    wellnessScoreEl.textContent = score;
+    
+    const scoreCircle = document.querySelector('.score-circle');
+    if (scoreCircle) {
+        scoreCircle.style.background = `conic-gradient(var(--primary-color) 0% ${score}%, var(--border-color) ${score}% 100%)`;
     }
 }
 
-/* Utility Classes */
-.hidden {
-    display: none !important;
+function updateCharts() {
+    const weeklyChart = document.getElementById('weeklyProgressChart');
+    if (weeklyChart) {
+        const bars = weeklyChart.querySelectorAll('.chart-bar');
+        bars.forEach(bar => {
+            const randomHeight = Math.floor(Math.random() * 80) + 20;
+            bar.style.height = `${randomHeight}%`;
+        });
+    }
+    
+    const categoryChart = document.getElementById('categoryChart');
+    if (categoryChart) {
+        const categories = ['wellness', 'work', 'education', 'personal'];
+        const bars = categoryChart.querySelectorAll('.chart-bar');
+        
+        categories.forEach((category, index) => {
+            if (bars[index]) {
+                const count = tasks.filter(t => t.category === category).length;
+                const maxCount = Math.max(...categories.map(cat => 
+                    tasks.filter(t => t.category === cat).length
+                )) || 1;
+                
+                const height = (count / maxCount) * 100;
+                bars[index].style.height = `${height}%`;
+            }
+        });
+    }
 }
 
-.page {
-    display: none;
+function updateRecentActivities() {
+    const recentActivities = document.getElementById('recentActivities');
+    if (!recentActivities) return;
+    
+    const recentCompleted = tasks
+        .filter(t => t.completed)
+        .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+        .slice(0, 5);
+    
+    const recentPrograms = enrolledPrograms
+        .sort((a, b) => new Date(b.enrolled_at) - new Date(a.enrolled_at))
+        .slice(0, 2);
+    
+    let activitiesHtml = '';
+    
+    recentCompleted.forEach(task => {
+        const timeAgo = getTimeAgo(task.updated_at || task.created_at);
+        activitiesHtml += `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Completed ${task.title}</div>
+                    <div class="activity-meta">
+                        <span class="activity-category">${task.category.charAt(0).toUpperCase() + task.category.slice(1)}</span>
+                        <span class="activity-time">${timeAgo}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    recentPrograms.forEach(program => {
+        const timeAgo = getTimeAgo(program.enrolled_at);
+        activitiesHtml += `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Started ${program.program_name}</div>
+                    <div class="activity-meta">
+                        <span class="activity-category">Program</span>
+                        <span class="activity-time">${timeAgo}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    const streak = calculateStreak();
+    if (streak >= 3) {
+        activitiesHtml += `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Earned ${streak}-Day Streak Badge</div>
+                    <div class="activity-meta">
+                        <span class="activity-category">Achievement</span>
+                        <span class="activity-time">Today</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (!activitiesHtml) {
+        activitiesHtml = `
+            <div class="activity-item">
+                <div class="activity-content">
+                    <div class="activity-title">No recent activities</div>
+                    <div class="activity-meta">
+                        <span class="activity-category">Complete tasks to see activity here</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    recentActivities.innerHTML = activitiesHtml;
 }
 
-.page.active {
-    display: block;
+function getTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    
+    return date.toLocaleDateString();
 }
 
-.dashboard-page {
-    display: none;
+function updateBadges(completedTasks, streak, totalTasks) {
+    const badges = document.querySelectorAll('.badge-item');
+    
+    if (completedTasks > 0 && badges[0]) {
+        badges[0].style.opacity = '1';
+    }
+    
+    if (streak >= 7 && badges[1]) {
+        badges[1].style.opacity = '1';
+    }
+    
+    if (totalTasks >= 10 && badges[2]) {
+        badges[2].style.opacity = '1';
+    }
+    
+    const wellnessTasks = tasks.filter(t => t.category === 'wellness').length;
+    if (wellnessTasks >= 5 && badges[3]) {
+        badges[3].style.opacity = '1';
+    }
 }
 
-.dashboard-page.active {
-    display: block;
+function loadSettings() {
+    if (!currentUser) return;
+    
+    const settingsEmail = document.getElementById('settingsEmail');
+    const settingsName = document.getElementById('settingsName');
+    const settingsBio = document.getElementById('settingsBio');
+    
+    if (settingsEmail) settingsEmail.value = currentUser.email;
+    if (settingsName) settingsName.value = localStorage.getItem('userName') || '';
+    if (settingsBio) settingsBio.value = localStorage.getItem('userBio') || '';
+    
+    const avatar = localStorage.getItem(`userAvatar_${currentUser.id}`);
+    const settingsAvatar = document.getElementById('settingsAvatar');
+    if (settingsAvatar && avatar) {
+        settingsAvatar.style.backgroundImage = `url(${avatar})`;
+        settingsAvatar.style.backgroundSize = 'cover';
+        settingsAvatar.style.backgroundPosition = 'center';
+        settingsAvatar.textContent = '';
+    } else if (settingsAvatar) {
+        settingsAvatar.textContent = currentUser.email.charAt(0).toUpperCase();
+    }
+    
+    loadUserPreferences();
 }
 
-#home.active {
-    display: block;
+function loadUserPreferences() {
+    if (!currentUser) return;
+    
+    const defaultPriority = document.getElementById('defaultPriority');
+    const defaultCategory = document.getElementById('defaultCategory');
+    const emailNotifications = document.getElementById('emailNotifications');
+    const taskReminders = document.getElementById('taskReminders');
+    const weeklyReports = document.getElementById('weeklyReports');
+    
+    if (defaultPriority) defaultPriority.value = localStorage.getItem('defaultPriority') || 'medium';
+    if (defaultCategory) defaultCategory.value = localStorage.getItem('defaultCategory') || 'wellness';
+    if (emailNotifications) emailNotifications.checked = localStorage.getItem('emailNotifications') !== 'false';
+    if (taskReminders) taskReminders.checked = localStorage.getItem('taskReminders') !== 'false';
+    if (weeklyReports) weeklyReports.checked = localStorage.getItem('weeklyReports') === 'true';
+    
+    const taskPriority = document.getElementById('taskPriority');
+    const taskCategory = document.getElementById('taskCategory');
+    if (taskPriority) taskPriority.value = localStorage.getItem('defaultPriority') || 'medium';
+    if (taskCategory) taskCategory.value = localStorage.getItem('defaultCategory') || 'wellness';
 }
 
-/* Wellness Goal Display */
-.wellness-goal-display {
-    background: var(--light-surface);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    margin-bottom: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image size must be less than 5MB', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const avatar = document.getElementById('settingsAvatar');
+        const sidebarAvatar = document.getElementById('userAvatar');
+        
+        if (avatar) {
+            avatar.style.backgroundImage = `url(${e.target.result})`;
+            avatar.style.backgroundSize = 'cover';
+            avatar.style.backgroundPosition = 'center';
+            avatar.textContent = '';
+        }
+        
+        if (sidebarAvatar) {
+            sidebarAvatar.style.backgroundImage = `url(${e.target.result})`;
+            sidebarAvatar.style.backgroundSize = 'cover';
+            sidebarAvatar.style.backgroundPosition = 'center';
+            sidebarAvatar.textContent = '';
+        }
+        
+        localStorage.setItem(`userAvatar_${currentUser.id}`, e.target.result);
+        showNotification('Profile picture updated!', 'success');
+    };
+    reader.readAsDataURL(file);
 }
 
-.wellness-goal-display h3 {
-    margin: 0;
-    color: var(--text-primary);
+function savePreferences() {
+    localStorage.setItem('defaultPriority', document.getElementById('defaultPriority').value);
+    localStorage.setItem('defaultCategory', document.getElementById('defaultCategory').value);
+    localStorage.setItem('emailNotifications', document.getElementById('emailNotifications').checked);
+    localStorage.setItem('taskReminders', document.getElementById('taskReminders').checked);
+    localStorage.setItem('weeklyReports', document.getElementById('weeklyReports').checked);
+    
+    const taskPriority = document.getElementById('taskPriority');
+    const taskCategory = document.getElementById('taskCategory');
+    if (taskPriority) taskPriority.value = localStorage.getItem('defaultPriority') || 'medium';
+    if (taskCategory) taskCategory.value = localStorage.getItem('defaultCategory') || 'wellness';
+    
+    showNotification('Preferences saved successfully!', 'success');
 }
 
-.wellness-goal-display p {
-    margin: 0.25rem 0 0 0;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+async function exportData() {
+    if (!currentUser) return;
+    
+    const exportData = {
+        user: {
+            email: currentUser.email,
+            name: localStorage.getItem('userName') || '',
+            bio: localStorage.getItem('userBio') || ''
+        },
+        tasks: tasks,
+        programs: enrolledPrograms,
+        preferences: {
+            defaultPriority: localStorage.getItem('defaultPriority'),
+            defaultCategory: localStorage.getItem('defaultCategory'),
+            emailNotifications: localStorage.getItem('emailNotifications'),
+            taskReminders: localStorage.getItem('taskReminders'),
+            weeklyReports: localStorage.getItem('weeklyReports')
+        },
+        exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `zentrack-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Data exported successfully!', 'success');
 }
 
-.wellness-goal-display .btn {
-    margin-left: auto;
+async function clearAllData() {
+    try {
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('user_id', currentUser.id);
+        
+        if (error) throw error;
+        
+        tasks = [];
+        renderTasks();
+        updateDashboard();
+        
+        showNotification('All tasks deleted successfully!', 'success');
+    } catch (error) {
+        showNotification('Error deleting tasks: ' + error.message, 'error');
+    }
 }
 
-/* Card Styles */
-.card {
-    background: var(--light-surface);
-    border-radius: 1rem;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 2rem;
+async function deleteAccount() {
+    try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw sessionError;
+        if (!session) throw new Error('No active session');
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to delete account');
+        }
+
+        localStorage.removeItem(`userAvatar_${currentUser.id}`);
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userBio');
+        localStorage.removeItem('defaultPriority');
+        localStorage.removeItem('defaultCategory');
+        localStorage.removeItem('emailNotifications');
+        localStorage.removeItem('taskReminders');
+        localStorage.removeItem('weeklyReports');
+
+        showNotification('Account deleted successfully!', 'success');
+        
+        logout();
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        
+        if (error.message.includes('Failed to delete account')) {
+            showNotification('Account data deleted. Please contact support to complete account removal.', 'success');
+            
+            await supabase.from('tasks').delete().eq('user_id', currentUser.id);
+            await supabase.from('user_programs').delete().eq('user_id', currentUser.id);
+            
+            localStorage.removeItem(`userAvatar_${currentUser.id}`);
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userBio');
+            localStorage.removeItem('defaultPriority');
+            localStorage.removeItem('defaultCategory');
+            localStorage.removeItem('emailNotifications');
+            localStorage.removeItem('taskReminders');
+            localStorage.removeItem('weeklyReports');
+            
+            logout();
+        } else {
+            showNotification('Error deleting account: ' + error.message, 'error');
+        }
+    }
 }
 
-.card-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+async function handleProfileUpdate(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('settingsName').value;
+    const bio = document.getElementById('settingsBio').value;
+    
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userBio', bio);
+    
+    const userNameEl = document.getElementById('userName');
+    if (userNameEl) userNameEl.textContent = name || currentUser.email.split('@')[0];
+    
+    showNotification('Profile updated successfully!', 'success');
 }
 
-.card-body {
-    padding: 1.5rem;
+async function handlePasswordChange(e) {
+    e.preventDefault();
+    
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+        showNotification('New passwords do not match', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showNotification('Password must be at least 6 characters long', 'error');
+        return;
+    }
+    
+    try {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+        
+        if (error) throw error;
+        
+        showNotification('Password updated successfully!', 'success');
+        document.getElementById('passwordForm').reset();
+    } catch (error) {
+        showNotification('Error updating password: ' + error.message, 'error');
+    }
 }
 
-.card-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+async function handleContactForm(e) {
+    e.preventDefault();
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    submitBtn.disabled = true;
+    
+    try {
+        const formData = new FormData(e.target);
+        const templateParams = {
+            from_name: formData.get('from_name'),
+            from_email: formData.get('from_email'),
+            subject: formData.get('subject'),
+            message: formData.get('message'),
+            to_email: 'support@zentrack.com'
+        };
+        
+        const response = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            templateParams
+        );
+        
+        if (response.status === 200) {
+            showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
+            document.getElementById('contactForm').reset();
+        } else {
+            throw new Error('Failed to send message');
+        }
+    } catch (error) {
+        console.error('EmailJS Error:', error);
+        showNotification('Failed to send message. Please try again later.', 'error');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
 }
 
-.card-subtitle {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+function showAlert(action, title, message, data = null) {
+    currentAlertAction = { action, data };
+    document.getElementById('alertTitle').textContent = title;
+    document.getElementById('alertMessage').textContent = message;
+    document.getElementById('alertModal').style.display = 'block';
+}
+
+function closeAlert() {
+    document.getElementById('alertModal').style.display = 'none';
+    currentAlertAction = null;
+}
+
+function handleAlertConfirm() {
+    if (!currentAlertAction) return;
+    
+    const { action, data } = currentAlertAction;
+    
+    switch (action) {
+        case 'deleteTask':
+            performDeleteTask(data);
+            break;
+        case 'unenrollProgram':
+            unenrollProgram(data);
+            break;
+        case 'clearData':
+            clearAllData();
+            break;
+        case 'deleteAccount':
+            deleteAccount();
+            break;
+    }
+    
+    closeAlert();
+}
+
+async function performDeleteTask(taskId) {
+    try {
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+
+        if (error) throw error;
+
+        tasks = tasks.filter(t => t.id !== taskId);
+        renderTasks();
+        updateDashboard();
+        
+        showNotification('Task deleted successfully!', 'success');
+    } catch (error) {
+        showNotification('Error deleting task: ' + error.message, 'error');
+    }
+}
+
+function openModal(modalType) {
+    const modalId = modalType === 'signin' ? 'signinModal' : 'signupModal';
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function switchModal(currentModalId, targetModalId) {
+    closeModal(currentModalId);
+    document.getElementById(targetModalId).style.display = 'block';
+}
+
+function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        ${message}
+    `;
+    notification.className = `notification ${type}`;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 4000);
+}
+
+function toggleFaq(element) {
+    const answer = element.nextElementSibling;
+    const icon = element.querySelector('.faq-icon');
+    
+    document.querySelectorAll('.faq-answer').forEach(ans => {
+        if (ans !== answer) {
+            ans.classList.remove('active');
+        }
+    });
+    document.querySelectorAll('.faq-question').forEach(q => {
+        if (q !== element) {
+            q.classList.remove('active');
+        }
+    });
+    
+    answer.classList.toggle('active');
+    element.classList.toggle('active');
+}
+
+function loadTasks() {
+    if (currentUser) {
+        loadUserData();
+    } else {
+        tasks = [];
+        renderTasks();
+    }
+}
+
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal, .alert-modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 }
